@@ -59,8 +59,8 @@ model.load_weights(COCO_MODEL_PATH, by_name=True)
 # 			<ymin>321</ymin>
 # 			<xmax>706</xmax>
 # 			<ymax>370</ymax>
-parked_car_boxes = np.array([
-    [370, 636, 321, 706]
+parked_car_boxes = parked_car_boxes = np.array([
+[321, 636, 370, 706]
 ])
 
 # Load the video file we want to run detection on
@@ -86,6 +86,7 @@ r = results[0]
     # Filter the results to only grab the car / truck bounding boxes
 car_boxes = get_car_boxes(r['rois'], r['class_ids'])
 print(car_boxes)
+print(parked_car_boxes)
 overlaps = mrcnn.utils.compute_overlaps(parked_car_boxes, car_boxes)
 print(overlaps)
 free_space = False
@@ -108,7 +109,7 @@ for parking_area, overlap_areas in zip(parked_car_boxes, overlaps):
         free_space = True
     else:
                 # Parking space is still occupied - draw a red box around it
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 1)
+        cv2.rectangle(frame, (x1, y1), (x2, y2), ( 255, 0,0), 1)
 
         # Write the IoU measurement inside the box
         font = cv2.FONT_HERSHEY_DUPLEX
@@ -154,8 +155,8 @@ for box in car_boxes:
     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 1)
 
     # Show the frame of video on the screen
-plt.imshow(frame)
-plt.show()
+cv2.imshow('sample image',frame)
+cv2.waitKey(0)
 
 # Clean up everything when finished
 # video_capture.release()
