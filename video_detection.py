@@ -45,7 +45,7 @@ if not os.path.exists(COCO_MODEL_PATH):
 IMAGE_DIR = os.path.join(ROOT_DIR, "images")
 
 # Video file or camera to process - set this to 0 to use your webcam instead of a video file
-VIDEO_SOURCE = "4.mp4"
+VIDEO_SOURCE = "parking2.mp4"
 
 # Create a Mask-RCNN model in inference mode
 model = MaskRCNN(mode="inference", model_dir=MODEL_DIR, config=MaskRCNNConfig())
@@ -62,7 +62,6 @@ video_capture = cv2.VideoCapture(VIDEO_SOURCE)
 # Loop over each frame of video
 while video_capture.isOpened():
     success, frame = video_capture.read()
-    print(frame)
     if not success:
         break
 
@@ -89,7 +88,7 @@ while video_capture.isOpened():
 
     # Draw each box on the frame
     for box in car_boxes:
-        print("Car: ", box)
+        # print("Car: ", box)
 
         y1, x1, y2, x2 = box
 
