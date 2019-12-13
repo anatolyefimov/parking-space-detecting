@@ -6,52 +6,60 @@ import mrcnn.utils
 from mrcnn.model import MaskRCNN
 from pathlib import Path
 import matplotlib.pyplot as plt
+from twilio.rest import Client
+
+# Twilio config
+twilio_account_sid = 'ACb3faf2906ec37fcbbfd630cbda8e4902'
+twilio_auth_token = '8f69357d7a44637cae54aeebe44f620b'
+twilio_phone_number = '+16122551706'
+destination_phone_number = '+79226260446'
+client = Client(twilio_account_sid, twilio_auth_token)
+# message = client.messages.create(
+#                     body="Отправляйся уже",
+#                     from_=twilio_phone_number,
+#                     to=destination_phone_number
+# )
 
 
-# Configuration that will be used by the Mask-RCNN library
+
 class MaskRCNNConfig(mrcnn.config.Config):
     NAME = "coco_pretrained_model_config"
     IMAGES_PER_GPU = 1
     GPU_COUNT = 1
-    NUM_CLASSES = 1 + 80  # COCO dataset has 80 classes + one background class
+    NUM_CLASSES = 1 + 80  
     DETECTION_MIN_CONFIDENCE = 0.6
 
-
-# Filter a list of Mask R-CNN detection results to get only the detected cars / trucks
 def get_car_boxes(boxes, class_ids):
     car_boxes = []
 
     for i, box in enumerate(boxes):
-        # If the detected object isn't a car / truck, skip it
         if class_ids[i] in [3, 8, 6]:
             car_boxes.append(box)
 
     return np.array(car_boxes)
 
 
-# Root directory of the project
 ROOT_DIR = Path(".")
 
-# Directory to save logs and trained model
 MODEL_DIR = os.path.join(ROOT_DIR, "logs")
 
-# Local path to trained weights file
+
 COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
 
-# Download COCO trained weights from Releases if needed
+
 if not os.path.exists(COCO_MODEL_PATH):
     mrcnn.utils.download_trained_weights(COCO_MODEL_PATH)
 
-# Directory of images to run detection on
+
 IMAGE_DIR = os.path.join(ROOT_DIR, "images")
 
-# Video file or camera to process - set this to 0 to use your webcam instead of a video file
+
 IMAGE_SOURCE = "image.png"
 
-# Create a Mask-RCNN model in inference mode
+
 model = MaskRCNN(mode="inference", model_dir=MODEL_DIR, config=MaskRCNNConfig())
 
-# Load pre-trained model
+
 model.load_weights(COCO_MODEL_PATH, by_name=True)
 
 # Location of parking spaces
@@ -63,11 +71,10 @@ parked_car_boxes = parked_car_boxes = np.array([
 [321, 636, 370, 706]
 ])
 
-# Load the video file we want to run detection on
+
 frame = cv2.imread(IMAGE_SOURCE)
 free_space_frames = 0
 
-# Convert the image from BGR color (which OpenCV uses) to RGB color
 rgb_image = frame[:, :, ::-1]
 
 # Run the image through the Mask R-CNN model to get results.
@@ -85,17 +92,15 @@ r = results[0]
 
     # Filter the results to only grab the car / truck bounding boxes
 car_boxes = get_car_boxes(r['rois'], r['class_ids'])
-print(car_boxes)
-print(parked_car_boxes)
+
 overlaps = mrcnn.utils.compute_overlaps(parked_car_boxes, car_boxes)
-print(overlaps)
 free_space = False
 for parking_area, overlap_areas in zip(parked_car_boxes, overlaps):
 
             # For this parking space, find the max amount it was covered by any
             # car that was detected in our image (doesn't really matter which car)
     max_IoU_overlap = np.max(overlap_areas)
-    print(overlap_areas)
+    # print(overlap_areas)
             # Get the top-left and bottom-right coordinates of the parking area
     y1, x1, y2, x2 = parking_area
 
